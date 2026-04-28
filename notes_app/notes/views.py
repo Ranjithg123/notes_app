@@ -1,7 +1,10 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
+from django.shortcuts import get_object_or_404
 from .models import Note
 from .serializers import NoteSerializer
+
 
 class NoteList(APIView):
     def get(self, request):
@@ -13,24 +16,25 @@ class NoteList(APIView):
         serializer = NoteSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class NoteDetail(APIView):
     def get(self, request, pk):
-        note = Note.objects.get(pk=pk)
+        note = get_object_or_404(Note, pk=pk)
         serializer = NoteSerializer(note)
         return Response(serializer.data)
 
     def put(self, request, pk):
-        note = Note.objects.get(pk=pk)
+        note = get_object_or_404(Note, pk=pk)
         serializer = NoteSerializer(note, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        note = Note.objects.get(pk=pk)
+        note = get_object_or_404(Note, pk=pk)
         note.delete()
-        return Response(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)

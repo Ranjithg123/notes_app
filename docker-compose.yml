@@ -1,0 +1,32 @@
+services:
+  # Django Backend + SQLite Database
+  backend:
+    build:
+      context: ./notes_app
+      dockerfile: Dockerfile
+    container_name: notesvault-backend
+    restart: unless-stopped
+    environment:
+      - DJANGO_DEBUG=false
+      - DJANGO_SECRET_KEY=G35TLwm3Xt0vKd8wxhDg2m18VIMF6umUVi_yQw4E_TtvjebJpqic_Y_hiRu0qqNun4s
+      - DJANGO_ALLOWED_HOSTS=*
+      - DB_DIR=/app/data
+    volumes:
+      - db_data:/app/data
+    expose:
+      - "8000"
+
+  # React Frontend + Nginx
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: notesvault-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
